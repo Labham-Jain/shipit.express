@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "pnpm run watch:typescript | pnpm run watch:templates",
     "watch:typescript": "tsc --watch",
-    "watch:templates": "chokidar 'src/templates/**/*' -c 'cp -r ./src/templates ./dist'"
+    "watch:templates": "rimraf ./dist && mkdir -p ./dist/templates && cp -r ./src/templates ./dist && chokidar 'src/templates/**/*' -c 'cp -r ./src/templates ./dist'"
   },
   "license": "ISC",
   "devDependencies": {
@@ -21,6 +21,7 @@
     "@types/yargs": "^17.0.32",
     "chokidar-cli": "^3.0.0",
     "nodemon": "^3.1.0",
+    "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },

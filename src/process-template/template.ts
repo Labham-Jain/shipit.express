@@ -31,6 +31,7 @@ export class Template {
 
     await this.processSteps();
 
+    await this.executeCommands();
     return this;
   }
 
@@ -47,7 +48,7 @@ export class Template {
       const {title, ...other} = step;
 
       const conditionOrKey = Object.keys(other)[0];
-      if(!(/^\$([a-z]+(?:-[a-z]+)*)\((\w+)\)?$/.test(conditionOrKey))) {
+      if(!(this.validateCondition(conditionOrKey))) {
 
         for(const listener of this.listeners.steps!) {
           const answer = await listener({
@@ -60,7 +61,18 @@ export class Template {
         }
       } else {
         const condition = conditionOrKey;
-        const matches = condition.match(/\$([a-z]+(?:-[a-z]+)*)\((\w+)\)/);
+        const matches = this.validateCondition(condition);
+
+        if(matches === true){
+          console.log(`failed to retrieve values from the condition!\n${condition}`);
+          return;
+        }
+
+        if(!matches) {
+          console.log(`failed to parse the condition!\n${condition}`);
+          return;
+        }
+
         const optionName = matches![1];
         const optionValue = matches![2];
         if(this.store[optionName] === optionValue) {
@@ -70,7 +82,7 @@ export class Template {
           for(const listener of this.listeners.steps!) {
             const answer = await listener({
               message: title,
-              name: conditionOrKey,
+              name: nextKey,
               choices: ((step[conditionOrKey] as {[name: string]: ({name: string})[]})[nextKey]).map(({name}) => name),
             });
   
@@ -79,5 +91,27 @@ export class Template {
         }
       }
     }
+  }
+
+  private async executeCommands() {
+  }
+
+  private validateCondition(condition: string) {
+    if(/^\$([a-z]+(?:-[a-z]+)*)\((\w+)\)?$/.test(condition)){
+      const match = condition.match(/\$([a-z]+(?:-[a-z]+)*)\((\w+)\)/)
+      if(match) {
+        const optionName = match[1];
+        const optionValue = match[2];
+
+        if(this.store[optionName] !== optionValue) {
+          return false
+        } else {
+          return [optionName, optionValue]
+        }
+      }
+      return true
+    }
+
+    return false
   }
 }

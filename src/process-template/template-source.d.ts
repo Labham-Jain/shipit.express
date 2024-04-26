@@ -6,7 +6,7 @@ type Step = {
 } & NestedValue<{name: string, title: string}[]>
 
 type Execute = {
-
+  [x: string]: Execute | string
 }
 
 export type TemplateSource = {
