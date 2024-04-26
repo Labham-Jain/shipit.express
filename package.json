@@ -1,0 +1,33 @@
+{
+  "name": "shipit.express",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "keywords": [],
+  "bin": {
+    "shpit": "dist/exec.js"
+  },
+  "author": "",
+  "scripts": {
+    "dev": "pnpm run watch:typescript | pnpm run watch:templates",
+    "watch:typescript": "tsc --watch",
+    "watch:templates": "chokidar 'src/templates/**/*' -c 'cp -r ./src/templates ./dist'"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@types/inquirer": "8.2.10",
+    "@types/node": "^20.12.7",
+    "@types/yargs": "^17.0.32",
+    "chokidar-cli": "^3.0.0",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "inquirer": "^8.2.5",
+    "nanostores": "^0.10.3",
+    "yaml": "^2.4.1",
+    "yargs": "^17.7.2"
+  }
+}
