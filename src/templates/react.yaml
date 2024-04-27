@@ -1,28 +1,38 @@
-name: react
-
 steps:
   # flavour
   - title: Select flavour
     flavour:
-      - name: Typescript
-      - name: VanillaJS
+      - option:
+          name: Typescript
+          value: typescript
+      - option:
+          name: Vanilla JS
+          value: vanilla-js
 
-  # bundler
   - title: Select bundler
-    $flavour(Typescript):
+    $flavour(typescript):
         bundler:
-          - name: vite
-          - name: webpack
+          - option:
+              name: Vite
+              value: vite
+          - option:
+              name: Webpack
+              value: webpack
 
-  # package manager
   - title: Select package manager
     package-manager:
-      - name: pnpm
-      - name: npm
-      - name: yarn
+      - option:
+          name: pnpm
+          value: pnpm
+      - option:
+          name: npm
+          value: npm
+      - option:
+          name: yarn
+          value: yarn
 
 execute:
   - $package-manager(pnpm):
       $bundler(vite):
         $flavour(Typescript): pnpm dlx create-vite-app@latest $_WORKDIR --template=react-ts
-        $flavour(VanillaJS): pnpm dlx create-vite-app@latest $_WORKDIR --template=react
+        $flavour(Vanilla JS): pnpm dlx create-vite-app@latest $_WORKDIR --template=react

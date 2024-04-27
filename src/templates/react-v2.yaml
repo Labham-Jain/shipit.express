@@ -1,0 +1,105 @@
+steps:
+  - title: Select flavour
+    name: flavour
+    options:
+      - option:
+          name: Typescript
+          value: typescript
+      - option:
+          name: Javascript
+          value: javascript
+
+
+  - title: Select bundler
+    name: bundler
+    $flavour(typescript):
+      options:
+        - option:
+            name: Vite
+            value: vite
+        - option:
+            name: Webpack
+            value: webpack
+    $flavour(javascript):
+      options:
+        - option:
+            name: Vite
+            value: vite
+        - option:
+            name: Create React App
+            value: create-react-app
+
+  - title: Select package manager
+    name: package-manager
+    package-manager:
+      - option:
+          name: pnpm
+          value: pnpm
+      - option:
+          name: npm
+          value: npm
+      - option:
+          name: yarn
+          value: yarn
+
+execute:
+
+  # Typescript
+  - $flavour(typescript):
+
+      # vite
+      $bundler(vite):
+        $package-manager(pnpm):
+          command: npm run build
+        $package-manager(npm):
+          command: npm run build
+        $package-manager(yarn):
+          command: npm run build
+      
+      # webpack
+      $bundler(webpack):
+        $package-manager(pnpm):
+          command: pnpm webpack init
+        $package-manager(npm):
+          command: npm run webpack init
+        $package-manager(yarn):
+          command: yarn webpack init
+
+      # create-react-app
+      $bundler(create-react-app):
+        $package-manager(pnpm):
+          command: pnpm dlx create-react-app .
+        $package-manager(npm):
+          command: npx create-react-app .
+        $package-manager(yarn):
+          command: yarn create react-app .
+
+  # Javascript
+  - $flavour(javascript):
+
+      # vite
+      $bundler(vite):
+        $package-manager(pnpm):
+          command: npm run build
+        $package-manager(npm):
+          command: npm run build
+        $package-manager(yarn):
+          command: npm run build
+      
+      # webpack
+      $bundler(webpack):
+        $package-manager(pnpm):
+          command: pnpm webpack init
+        $package-manager(npm):
+          command: npm run webpack init
+        $package-manager(yarn):
+          command: yarn webpack init
+
+      # create-react-app
+      $bundler(create-react-app):
+        $package-manager(pnpm):
+          command: pnpm dlx create-react-app .
+        $package-manager(npm):
+          command: npx create-react-app .
+        $package-manager(yarn):
+          command: yarn create react-app .

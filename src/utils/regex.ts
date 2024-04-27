@@ -1,0 +1,1 @@
+export const CONDITION_REGEX = /^\$([a-z]+(?:-[a-z]+)*)\((.*?)\)?$/

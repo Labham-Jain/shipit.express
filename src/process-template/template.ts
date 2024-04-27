@@ -1,14 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import yaml from 'yaml';
-import { NestedValue, TemplateSource } from './template-source';
+import { TemplateSource } from './template-source';
+import { CONDITION_REGEX } from '../utils/regex';
+import flattenKeys from '../utils/flattenKeys';
 
-// Define a mapping between event names and their corresponding listener types
 interface ListenerMap {
   steps: StepListener;
 }
 
-// Define listener types for each event
 interface StepListener {
   (step: {
     message: string;
@@ -43,40 +43,105 @@ export class Template {
   private async processSteps() {
     if(!this.src?.steps) return ;
     for (const step of this.src.steps) {
-      const {title, ...other} = step;
+      const {title, name, ...options} = step;
 
-      const conditionOrKey = Object.keys(other)[0];
-      if(!(/^\$([a-z]+(?:-[a-z]+)*)\((\w+)\)?$/.test(conditionOrKey))) {
-
-        for(const listener of this.listeners.steps!) {
-          const answer = await listener({
+      for(let i = 0; i < Object.keys(options).length; i++) {
+        const conditionOrKey = Object.keys(options)[i];
+        if(!(CONDITION_REGEX.test(conditionOrKey))) {
+          await this.prompt('steps', {
             message: title,
-            name: conditionOrKey,
-            choices: (step[conditionOrKey] as {name: string}[]).map(({name}) => name),
-          });
-
-          this.store = {...this.store, ...answer}
-        }
-      } else {
-        const condition = conditionOrKey;
-        const matches = condition.match(/\$([a-z]+(?:-[a-z]+)*)\((\w+)\)/);
-        const optionName = matches![1];
-        const optionValue = matches![2];
-        if(this.store[optionName] === optionValue) {
-
-          const nextKey = Object.keys(step[conditionOrKey])[0];
-
-          for(const listener of this.listeners.steps!) {
-            const answer = await listener({
-              message: title,
-              name: conditionOrKey,
-              choices: ((step[conditionOrKey] as {[name: string]: ({name: string})[]})[nextKey]).map(({name}) => name),
-            });
+            name: name,
+            choices: (step[conditionOrKey] as {option: string}[]).map(({option}) => option),
+          })
   
-            this.store = {...this.store, ...answer}
+        } else {
+          const condition = conditionOrKey;
+          const matches = condition.match(CONDITION_REGEX);
+          const optionName = matches![1];
+          const optionValue = matches![2];
+          const choices = this.getChoices(step[conditionOrKey] as any);
+  
+          if(this.store[optionName] === optionValue) {
+            await this.prompt('steps', {
+              message: title,
+              name: name,
+              choices: choices
+            })
           }
         }
       }
     }
+
+    this.executeSteps()
   }
+
+  private async prompt(event: keyof ListenerMap, data: any) {
+    for(const listener of this.listeners[event]!) {
+      const result = await listener(data);
+      this.store = {...this.store, ...result}
+    }
+  }
+
+  private getChoices(obj: any) {
+
+    const nextKey = Object.keys(obj)[0];
+    if(nextKey !== 'options'){
+      this.getChoices(obj[nextKey] as any);
+    }
+    return obj.options.map(({option} : any) => option)
+  }
+
+  executeSteps() {  
+    if(!this.src?.execute) return;
+    for (const execute of this.src.execute) {
+      this.validateCondition(execute, (conditions) => {
+        const command = this.getCommand(conditions);
+        if(command) {
+          console.log(command);
+        }
+      });
+    }
+  }
+
+  private validateCondition(obj: any, onMatch?: (conditions: string[]) => void) {
+    const commands = flattenKeys(obj); // get the second last key list
+
+    for (let i = 0; i < commands.length; i++) {
+      const command = commands[i];
+      const isConditionMatched = command.map((condition) => {
+        const match = condition.match(CONDITION_REGEX)
+        if(!match) return true;
+  
+        if(this.store[match[1]] === match[2]) {
+          return true
+        }
+        return false
+      }).every(Boolean);
+
+      if(isConditionMatched){
+        return onMatch?.(command);
+      }
+    }
+    return false
+  }
+
+  private getCommand = (conditions: string[]) => {
+    if(!this.src?.execute) return;
+
+    for (const execute of this.src.execute) {
+      const value = getValueFromPath(execute, conditions);
+      if(value){
+        return value
+      }
+    }
+  }
+}
+
+function getValueFromPath(obj: any, path: any) {
+  let value = obj;
+  for (const key of path) {
+    value = value[key];
+    if (!value) return undefined; // If any key doesn't exist, return undefined
+  }
+  return value;
 }

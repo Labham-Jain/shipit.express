@@ -3,7 +3,8 @@ type NestedValue<T> = {
 }
 type Step = {
   title: string;
-} & NestedValue<{name: string, title: string}[]>
+  name: string;
+} & NestedValue<{option: string}[]>
 
 type Execute = {
   [x: string]: Execute | string
