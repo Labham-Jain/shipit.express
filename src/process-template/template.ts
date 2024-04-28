@@ -4,6 +4,8 @@ import yaml from 'yaml';
 import { TemplateSource } from './template-source';
 import { CONDITION_REGEX } from '../utils/regex';
 import flattenKeys from '../utils/flattenKeys';
+import getValueFromPath from '../utils/getValueFromPath';
+import { spawnSync } from 'child_process';
 
 interface ListenerMap {
   steps: StepListener;
@@ -14,7 +16,7 @@ interface StepListener {
     message: string;
     name: string;
     choices: string[];
-}): Promise<{[name: string]: string}>;
+  }): Promise<{[name: string]: string}>;
 }
 
 export class Template {
@@ -41,107 +43,90 @@ export class Template {
   }
 
   private async processSteps() {
-    if(!this.src?.steps) return ;
+    if (!this.src?.steps) return;
     for (const step of this.src.steps) {
-      const {title, name, ...options} = step;
-
-      for(let i = 0; i < Object.keys(options).length; i++) {
-        const conditionOrKey = Object.keys(options)[i];
-        if(!(CONDITION_REGEX.test(conditionOrKey))) {
+      const { title, name, ...options } = step;
+  
+      for (const [conditionOrKey, value] of Object.entries(options)) {
+        if (!(CONDITION_REGEX.test(conditionOrKey))) {
           await this.prompt('steps', {
             message: title,
             name: name,
-            choices: (step[conditionOrKey] as {option: string}[]).map(({option}) => option),
-          })
-  
+            choices: Array.isArray(value) ? value.map(({ option }: { option: string }) => option) : [],
+          });
         } else {
-          const condition = conditionOrKey;
-          const matches = condition.match(CONDITION_REGEX);
-          const optionName = matches![1];
-          const optionValue = matches![2];
-          const choices = this.getChoices(step[conditionOrKey] as any);
+          const [condition, optionValue] = this.parseCondition(conditionOrKey);
+          const choices = this.getChoices(value);
   
-          if(this.store[optionName] === optionValue) {
+          if (this.store[condition] === optionValue) {
             await this.prompt('steps', {
               message: title,
               name: name,
-              choices: choices
-            })
+              choices: choices,
+            });
           }
         }
       }
     }
+  
+    this.executeSteps();
+  }
 
-    this.executeSteps()
+  private parseCondition(conditionOrKey: string): [string, string] {
+    const matches = conditionOrKey.match(CONDITION_REGEX) || [];
+    const [_, condition, optionValue] = matches;
+    return [condition, optionValue];
   }
 
   private async prompt(event: keyof ListenerMap, data: any) {
-    for(const listener of this.listeners[event]!) {
+    for (const listener of this.listeners[event]!) {
       const result = await listener(data);
-      this.store = {...this.store, ...result}
+      this.store = { ...this.store, ...result };
     }
   }
 
-  private getChoices(obj: any) {
-
+  private getChoices(obj: any): string[] {
     const nextKey = Object.keys(obj)[0];
-    if(nextKey !== 'options'){
-      this.getChoices(obj[nextKey] as any);
-    }
-    return obj.options.map(({option} : any) => option)
+    return nextKey === 'options' ? obj.options.map(({ option }: { option: string }) => option) : this.getChoices(obj[nextKey]);
   }
 
-  executeSteps() {  
-    if(!this.src?.execute) return;
+  executeSteps() {
+    if (!this.src?.execute) return;
     for (const execute of this.src.execute) {
       this.validateCondition(execute, (conditions) => {
         const command = this.getCommand(conditions);
-        if(command) {
-          console.log(command);
+        if (command) {
+          spawnSync(command, { shell: true, stdio: 'inherit', cwd: process.cwd() });
         }
       });
     }
   }
 
   private validateCondition(obj: any, onMatch?: (conditions: string[]) => void) {
-    const commands = flattenKeys(obj); // get the second last key list
+    const commands = flattenKeys(obj);
 
-    for (let i = 0; i < commands.length; i++) {
-      const command = commands[i];
-      const isConditionMatched = command.map((condition) => {
-        const match = condition.match(CONDITION_REGEX)
-        if(!match) return true;
-  
-        if(this.store[match[1]] === match[2]) {
-          return true
-        }
-        return false
-      }).every(Boolean);
+    for (const command of commands) {
+      const isConditionMatched = command.every((condition: string) => {
+        const match = condition.match(CONDITION_REGEX);
+        if (!match) return true;
+        return this.store[match[1]] === match[2];
+      });
 
-      if(isConditionMatched){
-        return onMatch?.(command);
+      if (isConditionMatched) {
+        onMatch?.(command);
+        return;
       }
     }
-    return false
   }
 
   private getCommand = (conditions: string[]) => {
-    if(!this.src?.execute) return;
+    if (!this.src?.execute) return;
 
     for (const execute of this.src.execute) {
       const value = getValueFromPath(execute, conditions);
-      if(value){
-        return value
+      if (value) {
+        return value;
       }
     }
   }
-}
-
-function getValueFromPath(obj: any, path: any) {
-  let value = obj;
-  for (const key of path) {
-    value = value[key];
-    if (!value) return undefined; // If any key doesn't exist, return undefined
-  }
-  return value;
 }

@@ -10,7 +10,7 @@
   },
   "author": "",
   "scripts": {
-    "dev": "pnpm run watch:typescript | pnpm run watch:templates",
+    "dev": "npm run watch:typescript | npm run watch:templates",
     "watch:typescript": "tsc --watch",
     "watch:templates": "rimraf ./dist && mkdir -p ./dist/templates && cp -r ./src/templates ./dist && chokidar 'src/templates/**/*' -c 'cp -r ./src/templates ./dist'"
   },

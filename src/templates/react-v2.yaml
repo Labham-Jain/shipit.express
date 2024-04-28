@@ -50,11 +50,11 @@ execute:
       # vite
       $bundler(vite):
         $package-manager(pnpm):
-          command: npm run build
+          command: pnpm create vite . --template react-ts && pnpm install
         $package-manager(npm):
-          command: npm run build
+          command: npx create-vite-app@latest . --template react-ts && npm install
         $package-manager(yarn):
-          command: npm run build
+          command: yarn create vite-app . --template react-ts && yarn install
       
       # webpack
       $bundler(webpack):
