@@ -19,6 +19,15 @@ interface StepListener {
   }): Promise<{[name: string]: string}>;
 }
 
+type TemplateExecuteOptions = {
+  directories: {
+    target: string;
+    current: string;
+    project: string;
+  }
+}
+
+
 export class Template {
   src: TemplateSource | undefined = undefined;
   srcString: string | undefined = undefined;
@@ -27,11 +36,20 @@ export class Template {
   } = {};
   store: Record<any, any> = {}
 
-  async execute(template: string) {
+
+  async execute(template: string, {directories}: TemplateExecuteOptions) {
+
+    const cwd = path.join(directories.current, directories.target);
+    fs.existsSync(cwd) || fs.mkdirSync(cwd);
+
+    process.chdir(cwd);
+
     this.srcString = fs.readFileSync(path.join(__dirname, '../templates', `${template}.yaml`), 'utf8');
     this.src = yaml.parse(this.srcString);
 
     await this.processSteps();
+
+    process.chdir(directories.current);
     return this;
   }
 
