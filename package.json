@@ -1,10 +1,11 @@
 {
   "name": "shipit.express",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "keywords": [],
+  "license": "UNLICENSED",
   "bin": {
     "shpit": "dist/exec.js"
   },
@@ -14,7 +15,6 @@
     "watch:typescript": "tsc --watch",
     "watch:templates": "rimraf ./dist && mkdir -p ./dist/templates && cp -r ./src/templates ./dist && chokidar 'src/templates/**/*' -c 'cp -r ./src/templates ./dist'"
   },
-  "license": "ISC",
   "devDependencies": {
     "@types/inquirer": "8.2.10",
     "@types/node": "^20.12.7",
