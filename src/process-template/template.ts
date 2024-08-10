@@ -7,7 +7,7 @@ import flattenKeys from '../utils/flattenKeys';
 import getValueFromPath from '../utils/getValueFromPath';
 import { spawnSync } from 'child_process';
 import * as child_process from 'child_process';
-
+import methods from './methods';
 interface ListenerMap {
   steps: StepListener;
 }
@@ -115,8 +115,19 @@ export class Template {
       this.validateCondition(execute, (conditions) => {
         const executeConfig = this.getCommandConfig(conditions);
         if (executeConfig) {
-          this.verifyRequiredScripts(executeConfig)
-          spawnSync(executeConfig.command, { shell: true, stdio: 'inherit', cwd: process.cwd() });
+          this.verifyRequiredScripts(executeConfig);
+
+          if(Array.isArray(executeConfig.command)){
+            for (let commandIndex = 0; commandIndex < executeConfig.command.length; commandIndex++) {
+              const command = executeConfig.command[commandIndex];
+              console.log('Executing command:', command);
+              this.executeShellCommand(command);
+            }
+          } else if(typeof executeConfig.command === 'string') {
+            this.executeShellCommand(executeConfig.command);
+          } else {
+            throw new Error('Invalid command config');
+          }
         }
       });
     }
@@ -149,7 +160,9 @@ export class Template {
     }
   }
 
+  // only works on unix like os.
   private verifyRequiredScripts(executeConfig: { command: string, requires: string [] }) {
+    if(!executeConfig.requires) return true;
     for (const requiredScript of executeConfig.requires) {
       try {
         const result = child_process.execSync(`which ${requiredScript}`);
@@ -159,5 +172,18 @@ export class Template {
       }
     }
     return true
+  }
+
+  private executeShellCommand(command: string) {
+
+    const commandName = command.split(' ')[0];
+    console.log(commandName);
+    if(methods[commandName]){
+      const args = command.split(' ').splice(1);
+      methods[commandName](...args);
+      return;
+    }
+
+    spawnSync(command, { shell: true, stdio: 'inherit', cwd: process.cwd() });
   }
 }

@@ -59,17 +59,34 @@ execute:
       # webpack
       $bundler(webpack):
         $package-manager(pnpm):
-          command: pnpm webpack-cli init
-          requires:
-              - webpack-cli
+          command:
+              - pnpm init
+              
+              - pnpm install --save react react-dom
+              
+              - pnpm install --save-dev webpack webpack-cli webpack-dev-server html-webpack-plugin babel-loader @babel/core @babel/preset-react typescript @types/react @types/react-dom @babel/preset-typescript
+
+              - COPY_RESOURCES ts-webpack
+
         $package-manager(npm):
-          command: npm run webpack init
-          requires:
-              - webpack-cli
+          command:
+              - npm init -y
+
+              - npm install --save react react-dom
+              
+              - npm install --save-dev webpack webpack-cli webpack-dev-server html-webpack-plugin babel-loader @babel/core @babel/preset-react typescript @types/react @types/react-dom @babel/preset-typescript
+
+              - COPY_RESOURCES ts-webpack
+
         $package-manager(yarn):
-          command: yarn webpack init
-          requires:
-              - webpack-cli
+          command:
+              - yarn init -y
+
+              - yarn add --save react react-dom
+              
+              - yarn add -D webpack webpack-cli webpack-dev-server html-webpack-plugin babel-loader @babel/core @babel/preset-react typescript @types/react @types/react-dom @babel/preset-typescript
+
+              - COPY_RESOURCES ts-webpack
 
       # create-react-app
       $bundler(create-react-app):
