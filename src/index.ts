@@ -2,6 +2,7 @@ import inquirer from 'inquirer';
 import {Template} from './process-template';
 import yargs from 'yargs';
 import path from 'path';
+import directoryState from './stores/directory.store';
 
 const main = async () => {
   const argv = (await yargs.parse(process.argv));
@@ -40,6 +41,9 @@ const main = async () => {
     console.error('No target path provided');
     process.exit(1);
   }
+
+
+  directoryState.setState({current: process.cwd(), target: targetPath, project: path.join(__dirname, '../')});
 
   template.execute(templateName, {directories: {current: process.cwd(), target: targetPath, project: path.join(__dirname, '../')}});
 }

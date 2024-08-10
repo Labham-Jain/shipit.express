@@ -1,25 +1,36 @@
 steps:
-  # flavour
   - title: Select flavour
-    flavour:
+    name: flavour
+    options:
       - option:
           name: Typescript
           value: typescript
       - option:
-          name: Vanilla JS
-          value: vanilla-js
+          name: Javascript
+          value: javascript
+
 
   - title: Select bundler
+    name: bundler
     $flavour(typescript):
-        bundler:
-          - option:
-              name: Vite
-              value: vite
-          - option:
-              name: Webpack
-              value: webpack
+      options:
+        - option:
+            name: Vite
+            value: vite
+        - option:
+            name: Webpack
+            value: webpack
+    $flavour(javascript):
+      options:
+        - option:
+            name: Vite
+            value: vite
+        - option:
+            name: Create React App
+            value: create-react-app
 
   - title: Select package manager
+    name: package-manager
     package-manager:
       - option:
           name: pnpm
@@ -32,7 +43,86 @@ steps:
           value: yarn
 
 execute:
-  - $package-manager(pnpm):
+
+  # Typescript
+  - $flavour(typescript):
+
+      # vite
       $bundler(vite):
-        $flavour(Typescript): pnpm dlx create-vite-app@latest $_WORKDIR --template=react-ts
-        $flavour(Vanilla JS): pnpm dlx create-vite-app@latest $_WORKDIR --template=react
+        $package-manager(pnpm):
+          command: pnpm create vite . --template react-ts && pnpm install
+        $package-manager(npm):
+          command: npx create-vite-app@latest . --template react-ts && npm install
+        $package-manager(yarn):
+          command: yarn create vite-app . --template react-ts && yarn install
+      
+      # webpack
+      $bundler(webpack):
+        $package-manager(pnpm):
+          command:
+              - pnpm init
+              
+              - pnpm install --save react react-dom
+              
+              - pnpm install --save-dev webpack webpack-cli webpack-dev-server html-webpack-plugin babel-loader @babel/core @babel/preset-react typescript @types/react @types/react-dom @babel/preset-typescript
+
+              - COPY_RESOURCES ts-webpack
+
+        $package-manager(npm):
+          command:
+              - npm init -y
+
+              - npm install --save react react-dom
+              
+              - npm install --save-dev webpack webpack-cli webpack-dev-server html-webpack-plugin babel-loader @babel/core @babel/preset-react typescript @types/react @types/react-dom @babel/preset-typescript
+
+              - COPY_RESOURCES ts-webpack
+
+        $package-manager(yarn):
+          command:
+              - yarn init -y
+
+              - yarn add --save react react-dom
+              
+              - yarn add -D webpack webpack-cli webpack-dev-server html-webpack-plugin babel-loader @babel/core @babel/preset-react typescript @types/react @types/react-dom @babel/preset-typescript
+
+              - COPY_RESOURCES ts-webpack
+
+      # create-react-app
+      $bundler(create-react-app):
+        $package-manager(pnpm):
+          command: pnpm dlx create-react-app .
+        $package-manager(npm):
+          command: npx create-react-app .
+        $package-manager(yarn):
+          command: yarn create react-app .
+
+  # Javascript
+  - $flavour(javascript):
+
+      # vite
+      $bundler(vite):
+        $package-manager(pnpm):
+          command: npm run build
+        $package-manager(npm):
+          command: npm run build
+        $package-manager(yarn):
+          command: npm run build
+      
+      # webpack
+      $bundler(webpack):
+        $package-manager(pnpm):
+          command: pnpm webpack-cli init
+        $package-manager(npm):
+          command: npm run webpack-cli init
+        $package-manager(yarn):
+          command: yarn webpack-cli init
+
+      # create-react-app
+      $bundler(create-react-app):
+        $package-manager(pnpm):
+          command: pnpm dlx create-react-app .
+        $package-manager(npm):
+          command: npx create-react-app .
+        $package-manager(yarn):
+          command: yarn create react-app .

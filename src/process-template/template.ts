@@ -6,7 +6,8 @@ import { CONDITION_REGEX } from '../utils/regex';
 import flattenKeys from '../utils/flattenKeys';
 import getValueFromPath from '../utils/getValueFromPath';
 import { spawnSync } from 'child_process';
-
+import * as child_process from 'child_process';
+import methods from './methods';
 interface ListenerMap {
   steps: StepListener;
 }
@@ -108,13 +109,25 @@ export class Template {
     return nextKey === 'options' ? obj.options.map(({ option }: { option: string }) => option) : this.getChoices(obj[nextKey]);
   }
 
-  executeSteps() {
+  private executeSteps() {
     if (!this.src?.execute) return;
     for (const execute of this.src.execute) {
       this.validateCondition(execute, (conditions) => {
-        const command = this.getCommand(conditions);
-        if (command) {
-          spawnSync(command, { shell: true, stdio: 'inherit', cwd: process.cwd() });
+        const executeConfig = this.getCommandConfig(conditions);
+        if (executeConfig) {
+          this.verifyRequiredScripts(executeConfig);
+
+          if(Array.isArray(executeConfig.command)){
+            for (let commandIndex = 0; commandIndex < executeConfig.command.length; commandIndex++) {
+              const command = executeConfig.command[commandIndex];
+              console.log('Executing command:', command);
+              this.executeShellCommand(command);
+            }
+          } else if(typeof executeConfig.command === 'string') {
+            this.executeShellCommand(executeConfig.command);
+          } else {
+            throw new Error('Invalid command config');
+          }
         }
       });
     }
@@ -137,14 +150,40 @@ export class Template {
     }
   }
 
-  private getCommand = (conditions: string[]) => {
+  private getCommandConfig = (conditions: string[]) => {
     if (!this.src?.execute) return;
-
     for (const execute of this.src.execute) {
-      const value = getValueFromPath(execute, conditions);
-      if (value) {
-        return value;
+      const executeConfig = getValueFromPath(execute, conditions);
+      if (executeConfig) {
+        return executeConfig;
       }
     }
+  }
+
+  // only works on unix like os.
+  private verifyRequiredScripts(executeConfig: { command: string, requires: string [] }) {
+    if(!executeConfig.requires) return true;
+    for (const requiredScript of executeConfig.requires) {
+      try {
+        const result = child_process.execSync(`which ${requiredScript}`);
+        console.log('Script exists', result);
+      } catch (error) {
+        // try to download the script from installable scripts 
+      }
+    }
+    return true
+  }
+
+  private executeShellCommand(command: string) {
+
+    const commandName = command.split(' ')[0];
+    console.log(commandName);
+    if(methods[commandName]){
+      const args = command.split(' ').splice(1);
+      methods[commandName](...args);
+      return;
+    }
+
+    spawnSync(command, { shell: true, stdio: 'inherit', cwd: process.cwd() });
   }
 }

@@ -15,5 +15,5 @@
       "moduleResolution": "Node",
     }
   },
-  "exclude": ["node_modules", "dist", "sandboxes"]
+  "exclude": ["node_modules", "dist", "sandboxes", "src/resources"]
 }

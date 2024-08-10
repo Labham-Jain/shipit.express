@@ -1,34 +1,40 @@
 {
   "name": "shipit.express",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "keywords": [],
+  "license": "UNLICENSED",
   "bin": {
     "shpit": "dist/exec.js"
   },
   "author": "",
   "scripts": {
-    "dev": "npm run watch:typescript | npm run watch:templates",
-    "watch:typescript": "tsc --watch",
-    "watch:templates": "rimraf ./dist && mkdir -p ./dist/templates && cp -r ./src/templates ./dist && chokidar 'src/templates/**/*' -c 'cp -r ./src/templates ./dist'"
+    "watch:typescript": "tsc-watch --noClear",
+    "dev": "rimraf dist && concurrently 'npm run watch:typescript' 'npm run copy-assets'",
+    "copy-assets": "mkdir -p ./dist/templates ./dist/resources ./dist/scripts && cp -r ./src/templates ./dist && cp -r ./src/resources ./dist && cp -r ./src/scripts ./dist && chokidar 'src/templates/**/*' -c 'cp -r ./src/templates ./dist' && chokidar 'src/resources/**/*' -c 'cp -r ./src/resources ./dist' && chokidar 'src/scripts/**/*' -c 'cp -r ./src/scripts ./dist'"
   },
-  "license": "ISC",
   "devDependencies": {
     "@types/inquirer": "8.2.10",
     "@types/node": "^20.12.7",
     "@types/yargs": "^17.0.32",
+    "@webpack-cli/generators": "^3.0.7",
     "chokidar-cli": "^3.0.0",
+    "concurrently": "^8.2.2",
     "nodemon": "^3.1.0",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "tsc-watch": "^6.2.0"
   },
   "dependencies": {
     "inquirer": "^8.2.5",
     "nanostores": "^0.10.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "yaml": "^2.4.1",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "zustand": "^4.5.4"
   }
 }
