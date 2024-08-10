@@ -19,6 +19,7 @@
     "@types/inquirer": "8.2.10",
     "@types/node": "^20.12.7",
     "@types/yargs": "^17.0.32",
+    "@webpack-cli/generators": "^3.0.7",
     "chokidar-cli": "^3.0.0",
     "nodemon": "^3.1.0",
     "rimraf": "^5.0.5",

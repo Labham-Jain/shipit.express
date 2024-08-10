@@ -1,0 +1,2 @@
+execute:
+  - npm i -g webpack-cli

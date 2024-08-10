@@ -59,11 +59,17 @@ execute:
       # webpack
       $bundler(webpack):
         $package-manager(pnpm):
-          command: pnpm webpack init
+          command: pnpm webpack-cli init
+          requires:
+              - webpack-cli
         $package-manager(npm):
           command: npm run webpack init
+          requires:
+              - webpack-cli
         $package-manager(yarn):
           command: yarn webpack init
+          requires:
+              - webpack-cli
 
       # create-react-app
       $bundler(create-react-app):
@@ -89,11 +95,11 @@ execute:
       # webpack
       $bundler(webpack):
         $package-manager(pnpm):
-          command: pnpm webpack init
+          command: pnpm webpack-cli init
         $package-manager(npm):
-          command: npm run webpack init
+          command: npm run webpack-cli init
         $package-manager(yarn):
-          command: yarn webpack init
+          command: yarn webpack-cli init
 
       # create-react-app
       $bundler(create-react-app):
