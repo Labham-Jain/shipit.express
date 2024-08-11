@@ -11,6 +11,7 @@
   },
   "author": "",
   "scripts": {
+    "build": "rimraf dist && tsc && npm run copy-assets",
     "watch:typescript": "tsc-watch --noClear",
     "dev": "rimraf dist && concurrently 'npm run watch:typescript' 'npm run copy-assets'",
     "copy-assets": "mkdir -p ./dist/templates ./dist/resources ./dist/scripts && cp -r ./src/templates ./dist && cp -r ./src/resources ./dist && cp -r ./src/scripts ./dist && chokidar 'src/templates/**/*' -c 'cp -r ./src/templates ./dist' && chokidar 'src/resources/**/*' -c 'cp -r ./src/resources ./dist' && chokidar 'src/scripts/**/*' -c 'cp -r ./src/scripts ./dist'"

@@ -1,6 +1,6 @@
 import path from "path";
 import directoryState from "../../stores/directory.store"
-import { copyFileSync, existsSync, lstat, lstatSync, mkdirSync, read, readdir } from "fs";
+import { copyFileSync, existsSync, lstatSync, mkdirSync, readdir } from "fs";
 
 const copyResources = (resourceName: string) => {
   const {project, target, current} = directoryState.getState();
@@ -24,6 +24,7 @@ const copyResources = (resourceName: string) => {
       if (!existsSync(destFolder)) {
         mkdirSync(destFolder, {recursive: true});
       }
+      
       copyFileSync(src, dest);
     }
   });
