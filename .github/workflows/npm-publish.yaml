@@ -15,15 +15,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-      - run: npm version --no-git-tag-version patch
+      - run: npm version patch --no-git-tag-version
       - run: npm install
       - run: npm run build
 
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
-    env:
-      NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,3 +29,5 @@ jobs:
           node-version: 18
           registry-url: https://registry.npmjs.org/
       - run: npm publish
+        env:
+          NPM_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
