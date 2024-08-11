@@ -3,6 +3,8 @@
 
 name: Shipit Express
 
+env:
+  NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
 on:
   push:
     branches: [main]
@@ -29,5 +31,3 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org/
       - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
