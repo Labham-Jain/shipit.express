@@ -1,0 +1,92 @@
+execute:
+  - $flavour(typescript):
+      command:
+        - $(PKG_INIT)
+        - $(PKG_INSTALL_DEV) typescript @types/node
+        - $(PKG_EXEC) tsc --init
+      $project-type(basic-setup):
+          $bundler(no):
+            $eslint(no):
+                $prettier(no):
+                  command:
+                    - END
+                $prettier(yes):
+                  command:
+                    - $(PKG_INSTALL_DEV) prettier
+                    - COPY_RESOURCES node:ts-basic/basic/prettier
+            $eslint(yes):
+                $prettier(no):
+                  command:
+                      - $(PKG_INSTALL_DEV) eslint
+                      - COPY_RESOURCES node:ts-basic/basic/eslint
+                $prettier(yes):
+                  command:
+                    - $(PKG_INSTALL_DEV) eslint prettier eslint-config-prettier eslint-plugin-prettier
+                    - COPY_RESOURCES node:ts-basic/basic/eslint-prettier
+          $bundler(ts-node):
+            command:
+              - $(PKG_INSTALL_DEV) ts-node nodemon
+              - COPY_RESOURCES node:ts-basic/ts-node/default
+            $eslint(no):
+                $prettier(no):
+                  command:
+                    - END
+                $prettier(yes):
+                  command:
+                    - $(PKG_INSTALL_DEV) prettier
+                    - COPY_RESOURCES node:ts-basic/ts-node/prettier
+            $eslint(yes):
+                $prettier(no):
+                    command:
+                      - $(PKG_INSTALL_DEV) ts-node nodemon
+                      - COPY_RESOURCES node:ts-basic/ts-node/eslint
+                $prettier(yes):
+                    command:
+                      - $(PKG_INSTALL_DEV) eslint prettier eslint-config-prettier eslint-plugin-prettier
+                      - COPY_RESOURCES node:ts-basic/ts-node/eslint-prettier
+      $project-type(http-server):
+        $framework(none):
+          command:
+            - $(PKG_INIT)
+            - $(PKG_INSTALL_DEV) @types/node dotenv
+            - $(PKG_EXEC) tsc --init
+          $eslint(no):
+            $prettier(no):
+              command:
+                - COPY_RESOURCES node:ts-http-server/no-framework/default
+            $prettier(yes):
+              command:
+                - $(PKG_INSTALL_DEV) prettier
+                - COPY_RESOURCES node:ts-http-server/no-framework/prettier
+          $eslint(yes):
+            $prettier(no):
+              command:
+                - $(PKG_INSTALL_DEV) eslint
+                - COPY_RESOURCES node:ts-http-server/no-framework/eslint
+            $prettier(yes):
+              command:
+                - $(PKG_INSTALL_DEV) eslint prettier eslint-config-prettier eslint-plugin-prettier
+                - COPY_RESOURCES node:ts-http-server/no-framework/eslint-prettier
+
+        $framework(express):
+          command:
+              - $(PKG_INSTALL_DEV) @types/express @types/cors dotenv
+              - $(PKG_INSTALL) express cors express-rate-limit
+              - COPY_RESOURCES node:ts-http-server/express/default
+          $eslint(no):
+            $prettier(no):
+              command:
+                - END
+            $prettier(yes):
+              command:
+                - $(PKG_INSTALL_DEV) prettier
+                - COPY_RESOURCES node:ts-http-server/express/prettier
+          $eslint(yes):
+            $prettier(no):
+              command:
+                - $(PKG_INSTALL_DEV) eslint
+                - COPY_RESOURCES node:ts-http-server/express/eslint
+            $prettier(yes):
+              command:
+                - $(PKG_INSTALL_DEV) eslint prettier eslint-config-prettier eslint-plugin-prettier 
+                - COPY_RESOURCES node:ts-http-server/express/eslint-prettier

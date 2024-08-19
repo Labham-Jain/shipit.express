@@ -1,0 +1,16 @@
+variables:
+  $package-manager(pnpm):
+    - PKG_INIT: pnpm init
+    - PKG_INSTALL: pnpm install --save
+    - PKG_INSTALL_DEV: pnpm install --save-dev
+    - PKG_EXEC: pnpm
+  $package-manager(npm):
+    - PKG_INIT: npm init -y
+    - PKG_INSTALL: npm install --save
+    - PKG_INSTALL_DEV: npm install --save-dev
+    - PKG_EXEC: npx
+  $package-manager(yarn):
+    - PKG_INIT: yarn init -y
+    - PKG_INSTALL: yarn add
+    - PKG_INSTALL_DEV: yarn add -D
+    - PKG_EXEC: yarn

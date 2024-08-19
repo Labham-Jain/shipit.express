@@ -31,7 +31,7 @@ steps:
 
   - title: Select package manager
     name: package-manager
-    package-manager:
+    options:
       - option:
           name: pnpm
           value: pnpm
@@ -66,7 +66,7 @@ execute:
               
               - pnpm install --save-dev webpack webpack-cli webpack-dev-server html-webpack-plugin babel-loader @babel/core @babel/preset-react typescript @types/react @types/react-dom @babel/preset-typescript
 
-              - COPY_RESOURCES ts-webpack
+              - COPY_RESOURCES react:ts-webpack
 
         $package-manager(npm):
           command:
@@ -76,7 +76,7 @@ execute:
               
               - npm install --save-dev webpack webpack-cli webpack-dev-server html-webpack-plugin babel-loader @babel/core @babel/preset-react typescript @types/react @types/react-dom @babel/preset-typescript
 
-              - COPY_RESOURCES ts-webpack
+              - COPY_RESOURCES react:ts-webpack
 
         $package-manager(yarn):
           command:
@@ -86,7 +86,7 @@ execute:
               
               - yarn add -D webpack webpack-cli webpack-dev-server html-webpack-plugin babel-loader @babel/core @babel/preset-react typescript @types/react @types/react-dom @babel/preset-typescript
 
-              - COPY_RESOURCES ts-webpack
+              - COPY_RESOURCES react:ts-webpack
 
       # create-react-app
       $bundler(create-react-app):

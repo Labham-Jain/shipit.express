@@ -1,7 +1,13 @@
 {
   "cSpell.words": [
+    "dotenv",
+    "Fastify",
+    "hapi",
+    "nodemon",
+    "Oclif",
+    "rollup",
     "shipit",
     "shpit",
     "WORKDIR"
-  ]
+  ],
 }

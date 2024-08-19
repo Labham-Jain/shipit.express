@@ -1,0 +1,108 @@
+steps:  
+  - title: Select flavour
+    name: flavour
+    options:
+      - option:
+          name: Typescript
+          value: typescript
+      - option:
+          name: Javascript
+          value: javascript
+
+  - title: Project Type
+    name: project-type
+    options:
+      - option:
+          name: Basic Setup
+          value: basic-setup
+      - option:
+          name: HTTP Server
+          value: http-server
+      - option:
+          name: npm Package
+          value: npm-package
+      - option:
+          name: Electron App
+          value: electron-app
+      - option:
+          name: Oclif CLI App
+          value: oclif-cli-app
+
+  - title: Select bundler
+    name: bundler
+    $project-type(basic-setup):
+      options:
+        - option:
+            name: None (skip)
+            value: none
+        - option:
+            name: ts-node
+            value: ts-node
+        - option:
+            name: Esbuild
+            value: esbuild
+        - option:
+            name: SWC
+            value: swc
+        - option:
+            name: Vite
+            value: vite
+        - option:
+            name: Rollup
+            value: rollup
+
+  - title: Select framework
+    name: framework
+    $project-type(http-server):
+      options:
+        - option:
+            name: None (skip)
+            value: none
+        - option:
+            name: express
+            value: express
+        - option:
+            name: Fastify
+            value: fastify
+        - option:
+            name: Koa
+            value: koa
+        - option:
+            name: Hapi
+            value: hapi
+        - option:
+            name: NestJS
+            value: nestjs
+
+  - title: Use ESLint
+    name: eslint
+    options:
+    - option:
+        name: Yes
+        value: yes
+    - option:
+        name: No
+        value: no
+
+  - title: Use Prettier
+    name: prettier
+    options:
+    - option:
+        name: Yes
+        value: yes
+    - option:
+        name: No
+        value: no
+
+  - title: Select package manager
+    name: package-manager
+    options:
+      - option:
+          name: pnpm
+          value: pnpm
+      - option:
+          name: npm
+          value: npm
+      - option:
+          name: yarn
+          value: yarn
